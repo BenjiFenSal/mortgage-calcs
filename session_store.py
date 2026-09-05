@@ -88,6 +88,16 @@ def _write_to_file(path: Path, sessions: list[dict]):
     path.write_text(json.dumps(sessions, indent=2))
 
 
+def _describe_error(e: Exception) -> str:
+    """gspread sometimes re-raises a bare PermissionError() with no message, hiding the actual
+    API error in __cause__. Walk the chain so the real reason (e.g. an API not being enabled
+    yet) actually reaches the UI instead of a blank, undiagnosable message."""
+    seen = e
+    while str(seen) == "" and seen.__cause__ is not None:
+        seen = seen.__cause__
+    return str(seen) or repr(e)
+
+
 def load_all_sessions(local_path: Path) -> list[dict]:
     """Reads the session library from Google Sheets if configured, else the local JSON file.
     Falls back to the local file (with a warning) if the Sheets call fails for any reason."""
@@ -95,7 +105,7 @@ def load_all_sessions(local_path: Path) -> list[dict]:
         try:
             return _load_from_sheet()
         except Exception as e:
-            st.warning(f"Couldn't reach Google Sheets ({e}) — showing local sessions instead.")
+            st.warning(f"Couldn't reach Google Sheets ({_describe_error(e)}) — showing local sessions instead.")
     return _load_from_file(local_path)
 
 
@@ -107,5 +117,5 @@ def write_all_sessions(sessions: list[dict], local_path: Path):
             _write_to_sheet(sessions)
             return
         except Exception as e:
-            st.warning(f"Couldn't save to Google Sheets ({e}) — saved locally instead.")
+            st.warning(f"Couldn't save to Google Sheets ({_describe_error(e)}) — saved locally instead.")
     _write_to_file(local_path, sessions)

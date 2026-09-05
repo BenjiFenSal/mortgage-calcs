@@ -73,13 +73,30 @@ as a new row in your Google Sheet.
 ## Part 5 — Deploy on Streamlit Community Cloud
 
 1. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
-2. **Create app** → pick your repo → set **Main file path** to `v4/app_v4.py` (the app lives in
-   the `v4/` subfolder of the repo).
+2. **Create app** → pick your repo. The repo has a `streamlit_app.py` at its root, which Streamlit
+   Cloud auto-detects as the entry point (it just runs the real app in `v4/`), so you can usually
+   leave **Main file path** on its default. If it doesn't auto-fill, set it to `streamlit_app.py`
+   explicitly.
 3. Before deploying, click **Advanced settings → Secrets** and paste the *entire contents* of
    your local `.streamlit/secrets.toml` into the box (this is the cloud equivalent of that file —
    it's stored encrypted by Streamlit, not in your repo).
 4. Click **Deploy**. Once it's live, anyone with the link can use the calculators, and every
    session saved from any device will sync through the same Google Sheet.
+5. Copy the app's URL (looks like `https://<something>.streamlit.app`).
+
+## Part 6 — Optional: a github.io landing page
+
+GitHub Pages can only serve static HTML — it can't run the Streamlit app itself (that needs a
+live Python process, which is what Part 5 sets up). What it *can* do is give you a short,
+memorable URL that redirects to the real app.
+
+1. Open `index.html` at the repo root and replace both occurrences of
+   `https://REPLACE-WITH-YOUR-APP.streamlit.app` with the real URL from Part 5, step 5.
+2. Commit and push that change.
+3. On GitHub: repo **Settings → Pages → Build and deployment → Source: Deploy from a branch**,
+   branch `main`, folder `/ (root)` → **Save**.
+4. After a minute or two, `https://<your-username>.github.io/<repo-name>/` will redirect straight
+   to the live app.
 
 ## Notes
 
